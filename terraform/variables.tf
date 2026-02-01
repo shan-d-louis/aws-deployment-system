@@ -25,10 +25,10 @@ variable "number_of_instances" {
 
 variable "github_username" {
     type = string
-    default = "test-username"  
+    default = "shan-d-louis"  
 }
 
 variable "github_repo" {
     type = string
-    default = "test-repo"  
+    default = "aws-deployment-system"  
 }
