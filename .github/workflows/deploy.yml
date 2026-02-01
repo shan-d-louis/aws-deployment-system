@@ -1,0 +1,51 @@
+name : Build and Deploy
+
+on:
+    push:
+        branches : [main]
+
+env:
+    AWS_REGION: us-east-2
+    ECR_REPOSITORY:  nameless-project
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+
+        outputs:
+            image_tag: ${{github.sha}}
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+            
+            -   name: Configure AWS credentials
+                uses: aws-actions/configure-aws-credentials@v4
+                with:
+                    role-to-assume: arn:aws:iam::279318650480:role/nameless-project-github-actions
+                    aws-region: ${{env.AWS_REGION}}
+            
+            -   name: login to Amazon ECR
+                id: login-ecr
+                uses: aws-actions/amazon-ecr-login@v2
+
+            -   name: Build and push Docker Image
+                env: 
+                    ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
+                    IMAGE_TAG: ${{github.sha}}
+                run: |
+                    docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./sample-app
+                    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                    echo "Pushed $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+
+
+
+
+
+
+    
+        
