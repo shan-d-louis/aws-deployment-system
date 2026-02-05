@@ -17,9 +17,9 @@ resource "aws_iam_role" "github_actions" {
                 Federated = aws_iam_openid_connect_provider.github.arn
             }
             Action = "sts:AssumeRoleWithWebIdentity"
-            Condtion = {
-                StringLine = {
-                    "token.actions.githubusercontent.com:sub" = "repo:${your_github_username}/${your_repo}:*"
+            Condition = {
+                StringLike = {
+                    "token.actions.githubusercontent.com:sub" = "repo:${var.your_github_username}/${var.your_repo}:*"
                 }
             }
         }]
@@ -29,7 +29,7 @@ resource "aws_iam_role" "github_actions" {
 //Github Permission
 resource "aws_iam_role_policy" "github_actions" {
     name = "${var.project_name}-github-actions-policy"
-    role = aws_iam_role.github_actions
+    role = aws_iam_role.github_actions.name
 
     policy = jsonencode({
         Version = "2012-10-17"

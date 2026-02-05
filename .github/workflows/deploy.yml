@@ -40,6 +40,121 @@ jobs:
                     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./nameless-project
                     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                     echo "Pushed $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    deploy-staging:
+        needs: build
+        runs-on: ubuntu-latest
+        environment: staging
+        permissions:
+            id-token: write
+            contents: read
+
+        steps:
+            -   name: configure AWS credentials
+                uses: aws-actions/configure-aws-credentials@v4
+                with:
+                    role-to-assume: arn:aws:iam::279318650480:role/nameless-project-github-actions
+                    aws-region: us-east-2
+            
+            -   name: Update Launch Template with New Image
+                run: |
+                        aws ec2 create-launch-template-version \
+                        --launch-template-name nameless-project-staging \
+                        --source-version '$Latest' \
+                        --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
+                        #!/bin/bash
+                        yum update -y
+                        yum install -y docker
+                        systemctl start docker
+                        systemctl enable docker
+                        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
+                        docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project:${{ github.sha }}
+                        docker run -d -p 9090:9090 -e ENVIRONMENT=staging 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project:${{ github.sha }}
+                        USERDATA
+                        )\"}"
+            
+            -   name: Trigger instance refresh
+                run: |
+                    aws autoscaling start-instance-refresh \
+                     --auto-scaling-group-name nameless-project-staging-asg \
+                     --preferences '{"MinHealthyPercentage" : 0}'
+                
+            -   name: Wait for deployment
+                run: |
+                    echo "Waiting for instance refresh to complete"
+                    while true; do 
+                        STATUS=$(aws autoscaling describe-instance-refreshes \
+                            --auto-scaling-group-name nameless-project-staging-asg \
+                            -- query 'InstanceRefreshes[0].Status' \
+                            --output text)
+                        echo "Status: $STATUS"
+                        if [ "$STATUS" = "Successful" ]; then
+                            echo "Deployment successful!"
+                            exit 0
+                        elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ]; then
+                            echo "Deployment failed!"
+                            exit 1
+                        fi
+                        sleep 30
+                    done
+            
+    deploy-production:
+        needs: deploy-staging
+        runs-on: ubuntu-latest
+        environment: production
+        permissions:
+            id-token: write
+            contents: read
+
+        steps:
+
+            -   name: configure AWS credentials
+                uses: aws-actions/configure-aws-credentials@v4
+                with:
+                    role-to-assume: arn:aws:iam::279318650480:role/nameless-project-github-actions
+                    aws-region: us-east-2
+
+            -   name: Update Launch Template with new image
+                run: |
+                    aws ec2 create-launch-template-version \
+                     --launch-template-name nameless-project-production \
+                     --source-version '$Latest' \
+                     --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
+                     #!/bin/bash
+                     yum update -y
+                     yum install -y docker
+                     systemctl start docker
+                     systemctl enable docker
+                     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
+                     docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project:${{ github.sha }}
+                     docker run -d -p 9090:9090 -e ENVIRONMENT=production 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project:${{github.sha}}
+                     USERDATA
+                     )\"}"
+
+            -   name: Trigger instance refresh
+                run: |
+                    aws autoscaling start-instance-refresh \
+                     --auto-scaling-group-name nameless-project-production-asg \
+                     --preferences '{"MinHealthyPercentage" : 0}'
+
+            -   name: Wait for deployment
+                run: |
+                    echo "Waiting for instance refresh to complete"
+                    while true; do
+                        STATUS=$(aws autoscaling describe-instance-refreshes \
+                            --auto-scaling-group-name nameless-project-production-asg \
+                            --query 'InstanceRefreshes[0].Status' \
+                            --output text)
+                        echo "Status: $STATUS"
+                        if [ "$STATUS" = "Successful" ]; then
+                            echo "Deployment successful!"
+                            exit 0
+                        elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ]; then
+                            echo "Deployment failed!"
+                            exit 1
+                        fi
+                        sleep 30
+                    done
+ 
 
 
 

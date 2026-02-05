@@ -87,7 +87,7 @@ module "asg_production" {
 }
 
 module "github_actions" {
-    source = "./modules/github-oidc" 
+    source = "./modules/iam/github-oidc" 
 
     project_name = var.project_name 
     your_github_username = var.github_username
