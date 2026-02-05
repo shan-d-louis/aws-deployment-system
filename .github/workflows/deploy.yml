@@ -58,7 +58,7 @@ jobs:
             -   name: Update Launch Template with New Image
                 run: |
                         aws ec2 create-launch-template-version \
-                        --launch-template-name nameless-project-staging \
+                        --launch-template-id lt-01379f327182c5a14 \
                         --source-version '$Latest' \
                         --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
                         #!/bin/bash
@@ -116,7 +116,7 @@ jobs:
             -   name: Update Launch Template with new image
                 run: |
                     aws ec2 create-launch-template-version \
-                     --launch-template-name nameless-project-production \
+                     --launch-template-id lt-0f32a91547f4d5f5b \
                      --source-version '$Latest' \
                      --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
                      #!/bin/bash
