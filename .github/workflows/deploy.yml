@@ -84,7 +84,7 @@ jobs:
                     while true; do 
                         STATUS=$(aws autoscaling describe-instance-refreshes \
                             --auto-scaling-group-name nameless-project-staging-asg \
-                            -- query 'InstanceRefreshes[0].Status' \
+                            --query 'InstanceRefreshes[0].Status' \
                             --output text)
                         echo "Status: $STATUS"
                         if [ "$STATUS" = "Successful" ]; then
