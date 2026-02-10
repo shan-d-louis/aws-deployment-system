@@ -119,16 +119,16 @@ jobs:
                      --launch-template-id lt-0f32a91547f4d5f5b \
                      --source-version '$Latest' \
                      --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
-                     #!/bin/bash
-                     yum update -y
-                     yum install -y docker
-                     systemctl start docker
-                     systemctl enable docker
-                     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
-                     docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
-                     docker run -d -p 9090:9090 -e ENVIRONMENT=production 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{github.sha}}
-                     USERDATA
-                     )\"}"
+                    #!/bin/bash
+                    yum update -y
+                    yum install -y docker
+                    systemctl start docker
+                    systemctl enable docker
+                    aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
+                    docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
+                    docker run -d -p 9090:9090 -e ENVIRONMENT=production 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{github.sha}}
+                    USERDATA
+                    )\"}"
 
             -   name: Trigger instance refresh
                 run: |
