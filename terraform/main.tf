@@ -74,7 +74,7 @@ module "asg_production" {
   source = "./modules/asg"
 
   project_name          = var.project_name
-  environment           = "prod"
+  environment           = "production"
   instance_type         = var.instance_type
   instance_profile_name = module.iam.instance_profile_name
   security_group_id     = module.security.ec2_sg_id
