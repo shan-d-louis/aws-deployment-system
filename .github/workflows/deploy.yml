@@ -116,7 +116,7 @@ jobs:
             -   name: Update Launch Template with new image
                 run: |
                     aws ec2 create-launch-template-version \
-                     --launch-template-id lt-0f32a91547f4d5f5b \
+                     --launch-template-id lt-004d5a4cd38b9e05a \
                      --source-version '$Latest' \
                      --launch-template-data "{\"UserData\":\"$(cat << 'USERDATA' | base64 -w0
                     #!/bin/bash
