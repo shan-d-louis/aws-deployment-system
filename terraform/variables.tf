@@ -10,7 +10,7 @@ variable "aws_region" {
 
 variable "app_port" {
   type    = number
-  default = 9090
+  default = 3000
 }
 
 variable "instance_type" {

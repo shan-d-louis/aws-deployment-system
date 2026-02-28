@@ -68,7 +68,7 @@ jobs:
                         systemctl enable docker
                         aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
                         docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
-                        docker run -d -p 9090:9090 -e ENVIRONMENT=staging 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
+                        docker run -d -p 3000:3000 -e ENVIRONMENT=staging 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
                         USERDATA
                         )\"}"
             
@@ -126,7 +126,7 @@ jobs:
                     systemctl enable docker
                     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 279318650480.dkr.ecr.us-east-2.amazonaws.com
                     docker pull 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{ github.sha }}
-                    docker run -d -p 9090:9090 -e ENVIRONMENT=production 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{github.sha}}
+                    docker run -d -p 3000:3000 -e ENVIRONMENT=production 279318650480.dkr.ecr.us-east-2.amazonaws.com/nameless-project-repo:${{github.sha}}
                     USERDATA
                     )\"}"
 
